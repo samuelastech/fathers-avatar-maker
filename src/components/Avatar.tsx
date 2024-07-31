@@ -1,9 +1,13 @@
 import { useEffect, useReducer, useRef } from "react";
 import { useAvatar } from "../hooks/useAvatar";
+import { useSubmit } from "../hooks/useSubmit";
+import { useNavigate } from "react-router-dom";
 
 export const Avatar = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const navigate = useNavigate();
   const [, forceUpdate] = useReducer(x => x + 1, 0);
+  const { submit } = useSubmit();
   const {
     tone,
     hair: hairSrc,
@@ -124,10 +128,19 @@ export const Avatar = () => {
           await renderBeard();
           await renderMoustache();
           await renderGlasses();
+          
           forceUpdate();
         };
 
+        const generateFinal = async () => {
+          canvas.height = 430;
+          await drawOnCanvas();
+          const dataURL = canvas.toDataURL('image/png');
+          if (dataURL) navigate('/product', { state: { dataURL } });
+        };
+
         drawOnCanvas();
+        submit && generateFinal();
       }
     }
   }, [
@@ -135,10 +148,12 @@ export const Avatar = () => {
     hairSrc,
     beardSrc,
     moustacheSrc,
-    glassesSrc
+    glassesSrc,
+    submit,
+    navigate,
   ]);
 
   return (
-    <canvas ref={canvasRef} width="200" height="200" className="mx-auto my-3"></canvas>
+    <canvas ref={canvasRef} width="210" height="200" className="mx-auto my-3"></canvas>
   );
 };
