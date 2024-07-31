@@ -23,6 +23,7 @@ export const FinalProduct = () => {
 
   const goToShop = () => {
     window.open('https://www.instagram.com/real.braz/', '_blank');
+
   };
 
   useEffect(() => {
