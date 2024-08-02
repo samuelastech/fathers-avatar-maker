@@ -1,18 +1,18 @@
-import React from "react";
+import { useRef, useMemo, useEffect } from "react";
 import { Image } from "react-konva";
-// gifler will be imported into global window object
+import Konva from "konva";
 import "gifler";
 
-// the first very simple and recommended way:
-export const GIF = ({ src, y }) => {
-  const imageRef = React.useRef(null);
-  const canvas = React.useMemo(() => {
-    const node = document.createElement("canvas");
-    return node;
-  }, []);
+export interface GifProps {
+  src: string;
+  y: number;
+}
 
-  React.useEffect(() => {
-    // save animation instance to stop it on unmount
+export const Gif = ({ src, y }: GifProps) => {
+  const imageRef = useRef<Konva.Image>(null);
+  const canvas = useMemo(() => document.createElement("canvas"), []);
+
+  useEffect(() => {
     let anim;
     const f = window.gifler(src);
     
@@ -22,7 +22,6 @@ export const GIF = ({ src, y }) => {
       anim.onDrawFrame = (ctx, frame) => {
         ctx.drawImage(frame.buffer, frame.x, frame.y);
         if (imageRef.current) {
-
           imageRef.current.getLayer().draw();
         }
       };

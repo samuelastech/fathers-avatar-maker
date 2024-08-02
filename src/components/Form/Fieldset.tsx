@@ -6,7 +6,7 @@ export interface FieldsetProps {
 
 export const Fieldset = ({ children }: FieldsetProps) => {
   return (
-    <fieldset className="w-5/6">
+    <fieldset className="w-5/6 flex flex-col justify-between h-full">
       {children}
     </fieldset>
   );

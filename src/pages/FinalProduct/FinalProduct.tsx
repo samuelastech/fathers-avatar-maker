@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Stage, Layer, Image } from "react-konva";
-import { GIF } from '../../components/Gif';
+import { Text, Button, Scenario } from "../../components";
 import useImage from "use-image";
-import { Text } from "../../components/Text";
-import { Button } from "../../components/Button";
 
 interface ImageModule {
   default: string;
@@ -20,10 +18,12 @@ const scenarios = import.meta.glob('../../assets/scenarios/*.{png,jpg,jpeg,gif}'
 export const FinalProduct = () => {
   const [loadScenarios, setScenariosSources] = useState<ImageSource[]>([]);
   const [stageHeight, setStageHeight] = useState<number>(0);
+  const { state } = useLocation();
+  const { dataURL } = state;
+  const [image] = useImage(dataURL);
 
   const goToShop = () => {
     window.open('https://www.instagram.com/real.braz/', '_blank');
-
   };
 
   useEffect(() => {
@@ -45,9 +45,7 @@ export const FinalProduct = () => {
     setStageHeight(loadScenarios.length * (650 + 50));
   }, [loadScenarios]);
 
-  const location = useLocation();
-  const { dataURL } = location.state;
-  const [image] = useImage(dataURL);
+  
 
   return (
     <div className="bg-white py-4 px-6 rounded my-4">
@@ -60,10 +58,10 @@ export const FinalProduct = () => {
           {
             loadScenarios.map((scenario, i) => {  
               return (
-                <>
-                  <GIF key={i} y={(650 + 50) * i} src={scenario.src} />
-                  <Image image={image} width={190} height={410} y={((650 + 50) * i) + (650 - 410)} x={(650 - 430) / 2} />
-                </>
+                <React.Fragment key={i}>
+                  <Scenario.Gif y={(650 + 50) * i} src={scenario.src} />
+                  <Image image={image} width={210} height={135} y={((650 + 50) * i) + (650 - 410)} x={(650 - 430) / 2} />
+                </React.Fragment>
               );
             })
           }

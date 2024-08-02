@@ -1,15 +1,14 @@
 import { InputHTMLAttributes } from 'react';
-import { useSubmit } from '../../hooks/useSubmit';
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+  value?: string;
+  setValue?: (value: string) => void;
 }
 
-export const Input = ({ ...rest }: InputProps) => {
-  const { name, setName } = useSubmit();
-
+export const Input = ({ value, setValue, ...rest }: InputProps) => {
   return (
     <input
-      value={name} onChange={(event) => setName(event.target.value)}
+      value={value} onChange={(event) => setValue && setValue(event.target.value)}
       className="
         w-full
         py-2
@@ -19,6 +18,8 @@ export const Input = ({ ...rest }: InputProps) => {
         bg-transparent
         placeholder:text-gray-400
         outline-none
+        focus:border-b-pink-600
+        text-center
       "
       {...rest}
     />

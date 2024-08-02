@@ -1,16 +1,24 @@
-export interface StepsProps {
-  currentStep: number;
-}
+import { useSubmit } from "../../hooks/useSubmit";
 
-export const Steps = ({ currentStep }: StepsProps) => {
-  const steps = ['Passo 1', 'Passo 2'];
+export const Steps = () => {
+  const { step: currentStep } = useSubmit();
+  const steps = [1, 2];
 
   return (
     <div className="w-full max-w-96 h-10 mx-auto flex items-center relative shadow mb-3">
       {steps.map((step, i) => {
         return (
-          <div className="z-20 flex-1 flex items-center justify-center h-full text-center">
-            <span className={`flex-1 ${i <= currentStep ? 'text-white' : null}`}>{step}</span>
+          <div key={i} className="z-20 flex-1 flex items-center justify-center h-full text-center">
+            <span
+              className={`
+                transition-all
+                ease
+                duration-500
+                flex-1
+                ${(i + 1) <= currentStep ? 'text-white' : null}
+              `}>
+              {`Passo ${step}`}
+            </span>
           </div>
         );
       })}
@@ -24,7 +32,11 @@ export const Steps = ({ currentStep }: StepsProps) => {
         bg-gradient-to-r from-pink-600 to-amber-500
         
         h-full
-        ${currentStep === 0 ? 'w-1/2' : 'w-full'}
+        transition-all
+        ease
+        duration-500
+        rounded-t
+        ${currentStep === 1 ? 'w-1/2' : 'w-full'}
       `}></div>
   </div>
   );

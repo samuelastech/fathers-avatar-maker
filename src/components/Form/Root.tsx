@@ -6,20 +6,15 @@ export interface RootProps {
 }
 
 export const Root = ({ children }: RootProps) => {
-  const { setSubmit } = useSubmit(); 
-
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setSubmit(true);
-  };
-
+  const { handleSubmit } = useSubmit(); 
+  
   return (
     <form
       onSubmit={handleSubmit}
       className="
         w-full
         max-w-96
-        min-h-[450px]
+        h-[500px]
         rounded
         
         relative

@@ -1,22 +1,15 @@
-import { ReactNode, useEffect } from "react";
-import { useSwiperSlide } from "swiper/react";
-import { Assets } from "./AssetsEnum";
+import { ReactNode } from "react";
+import { AssetsEnum } from "./AssetsEnum";
 import { useAvatar } from "../../hooks/useAvatar";
 
 export interface AssetProps {
   icon?: ReactNode;
-  asset?: Assets;
+  asset?: AssetsEnum;
+  text?: string;
 }
 
-export const Asset = ({ icon, asset }: AssetProps) => {
-  const swiperSlide = useSwiperSlide();
-  const { setPalette } = useAvatar();
-
-  useEffect(() => {
-    if(swiperSlide.isActive && asset) {
-      setPalette(asset);
-    }
-  }, [asset, setPalette, swiperSlide.isActive]);
+export const Asset = ({ icon, asset, text = '' }: AssetProps) => {
+  const { palette, setPalette } = useAvatar();
 
   return (
     <button
@@ -26,10 +19,9 @@ export const Asset = ({ icon, asset }: AssetProps) => {
         border-2
         border-gray-700
         bg-white
-        rounded-full
         p-2
         text-2xl
-        ${!swiperSlide.isActive ? 'scale-75' : null}
-      `}>{icon}</button>
+        ${palette === asset ? null: 'scale-75'}
+      `}>{icon}{text}</button>
   );
 };

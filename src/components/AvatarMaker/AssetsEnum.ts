@@ -1,4 +1,4 @@
-export enum Assets {
+export enum AssetsEnum {
   Body = 'body',
   Hair = 'hair',
   Beard = 'beard',
