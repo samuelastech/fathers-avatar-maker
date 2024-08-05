@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAvatar } from "../../hooks/useAvatar";
+import { createImage, Image as AvatarImage } from "../../helpers/createImage";
 import { Layer, Stage, Image as Img } from 'react-konva';
 import Konva from 'konva';
 
@@ -8,7 +9,9 @@ interface Size {
   height?: number;
 }
 
-type AvatarImage = HTMLImageElement | null;
+type ImagesMap = {
+  [key: string]: AvatarImage;
+};
 
 export const Frame = () => {
   const DEFAULT_HEIGTH = 200;
@@ -17,6 +20,7 @@ export const Frame = () => {
 
   const canvasRef = useRef<Konva.Stage>(null);
   const headRef = useRef<Konva.Layer>(null);
+  const [firstRender, setFirstRender] = useState(true);
 
   // Sources
   const {
@@ -29,28 +33,14 @@ export const Frame = () => {
   } = useAvatar();
 
   // Elements
-  const [body, setBody] = useState<AvatarImage>(null);
-  const [head, setHead] = useState<AvatarImage>(null);
-  const [hair, setHair] = useState<AvatarImage>(null);
-  const [beard, setBeard] = useState<AvatarImage>(null);
-  const [moustache, setMoustache] = useState<AvatarImage>(null);
-  const [glasses, setGlasses] = useState<AvatarImage>(null);
-
-  const createImage = async (src: string, set: (param: AvatarImage) => void) => {
-    return new Promise<void>((resolve) => {
-      if (src) {
-        const imgEl = new Image();
-        imgEl.onload = () => {
-          set(imgEl);
-          resolve();
-        };
-        imgEl.src = src;
-      } else {
-        set(null);
-        resolve();
-      }
-    });
-  };
+  const [images, setImages] = useState<ImagesMap>({
+    body: null,
+    head: null,
+    hair: null,
+    beard: null,
+    moustache: null,
+    glasses: null,
+  });
 
   const resizeCanvas = ({ width = DEFAULT_WIDTH, height = DEFAULT_HEIGTH }: Size) => {
     if (canvasRef.current) {
@@ -62,29 +52,35 @@ export const Frame = () => {
     return (canvasSize - objectWidth) / 2;
   };
 
-  const takePicture = useCallback(() => {
+  const getFrame = useCallback(() => {
     if (headRef.current) {
       setFrame(headRef.current.toDataURL());
     }
   }, [setFrame]);
 
+  const takePicture = useCallback(() => {
+    resizeCanvas({ height: PICTURE_SIZE });
+    getFrame();
+    resizeCanvas({ height: DEFAULT_HEIGTH });
+  }, [getFrame]);
+
   useEffect(() => {
     const loadImages = async () => {
-      const bodySrc = await import(`../../assets/body/${tone}.png`);
+      const bodySrc = await import(`../../assets/body/1/${tone}.png`);
       const headSrc = await import(`../../assets/face/${tone}.png`);
-      await Promise.all([
-        createImage(bodySrc.default, setBody),
-        createImage(headSrc.default, setHead),
-        createImage(hairSrc, setHair),
-        createImage(beardSrc, setBeard),
-        createImage(moustacheSrc, setMoustache),
-        createImage(glassesSrc, setGlasses),
+      const [body, head, hair, beard, moustache, glasses] = await Promise.all([
+        createImage(bodySrc.default),
+        createImage(headSrc.default),
+        createImage(hairSrc),
+        createImage(beardSrc),
+        createImage(moustacheSrc),
+        createImage(glassesSrc),
       ]);
-      resizeCanvas({ height: PICTURE_SIZE });
-      takePicture();
-      resizeCanvas({ height: DEFAULT_HEIGTH });
+
+      setImages({ body, head, hair, beard, moustache, glasses });
     };
     loadImages();
+    setFirstRender(false);
   }, [
     tone,
     hairSrc,
@@ -94,23 +90,29 @@ export const Frame = () => {
     takePicture
   ]);
 
+  useEffect(() => {
+    if (!firstRender) {
+      takePicture();
+    }
+  }, [firstRender, takePicture]);
+
   return (
     <Stage
       width={DEFAULT_WIDTH}
       height={PICTURE_SIZE}
-      className="flex justify-center my-3 border"
+      className="flex justify-center my-3 border border-transparent"
       style={{ borderStyle: 'solid' }}
       ref={canvasRef}>
       <Layer height={PICTURE_SIZE} ref={headRef}>
-        { head && <Img image={head} x={centerOnCanvas(100)} y={30} width={100} height={100} /> }
-        { hair && <Img image={hair} x={centerOnCanvas(100)} y={-10} width={90} height={90} /> }
-        { beard && <Img image={beard} x={58} y={52} width={101} height={85} /> }
-        { moustache && <Img image={moustache} x={45} y={59} width={90} height={82} /> }
-        { glasses && <Img image={glasses} x={50} y={30} width={87} height={95} /> }
+        { images.head && <Img image={images.head} x={centerOnCanvas(100)} y={30} width={100} height={100} /> }
+        { images.hair && <Img image={images.hair} x={centerOnCanvas(100)} y={-10} width={90} height={90} /> }
+        { images.beard && <Img image={images.beard} x={58} y={52} width={101} height={85} /> }
+        { images.moustache && <Img image={images.moustache} x={45} y={59} width={90} height={82} /> }
+        { images.glasses && <Img image={images.glasses} x={50} y={30} width={87} height={95} /> }
       </Layer>
       <Layer>
-        { body && <Img image={body} x={centerOnCanvas(300)} y={120} width={300} height={300} /> }
-        { beard && <Img image={beard} x={58} y={52} width={101} height={85} /> }
+        { images.body && <Img image={images.body} x={centerOnCanvas(300)} y={120} width={300} height={300} /> }
+        { images.beard && <Img image={images.beard} x={58} y={52} width={101} height={85} /> }
       </Layer>
     </Stage>
   );
